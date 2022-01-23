@@ -1,0 +1,74 @@
+//for (const Rectangle obstacle : Obstacles)
+	//{
+	//	if (CheckCollisionRecs(Rectangle{ player.Position.x, player.Position.y, player.Size.x, player.Size.y }, obstacle))// && player.Position.y - player.Size.y <= obstacle.y)
+	//	{
+	//		float playerX = newPos.x;
+	//		float playerY = newPos.y;
+	//		float playerH = player.Size.y;
+	//		float playerW = player.Size.x;
+	//		Vector2 playerTL = { playerX, playerY };
+	//		Vector2 playerTR = { playerX + playerW, playerY};
+	//		Vector2 playerBL = { playerX, playerY + playerH };
+	//		Vector2 playerBR = { playerX + playerW, playerY + playerH };
+	//		if (playerBL.y > obstacle.y)
+	//		{
+	//			newPos.y = obstacle.y - playerH;
+	//			player.Velocity.y = 0;
+	//			if (player.State == PlayerState::FallDown && player.State != PlayerState::Run) {
+	//				getState();
+	//				printf(stateName + '\n');
+	//				player.State = PlayerState::Idle;
+	//			}
+	//		}
+	//		//if ((playerBR.x > obstacle.x && playerBR.x < obstacle.x + obstacle.width) ||
+	//		//	(playerBL.x > obstacle.x && playerBL.x < obstacle.x + obstacle.width) &&
+	//		//	(playerBR.y > obstacle.y && playerBL.y > obstacle.y)
+	//		//	) {
+	//		//	player.Velocity.y = 0;
+	//		//	//player.Position.y = obstacle.y - obstacle.height;
+	//		//	newPos.y = obstacle.y - playerH;
+	//		//	player.State = PlayerState::FallDown;
+	//		//}
+	//		////if (playerY + playerH > obstacle.y) {
+	//		////	player.Velocity.y = 0;
+	//		////	//player.Position.y = obstacle.y - obstacle.height;
+	//		////	newPos.y = obstacle.y - playerH;
+	//		////	player.State = PlayerState::Idle;
+	//		////}
+	//		////if (playerX + playerW > obstacle.x) {
+	//		////	player.Velocity.x = 0;
+	//		////	newPos.x = obstacle.x - playerW;
+	//		////	player.State = PlayerState::FallDown;
+	//		////}
+
+
+
+
+	//		////new point would be in the obstacle
+	//		//if (player.Position.y - player.Size.y < newPos.y - player.Size.y)
+	//		//{
+	//		//	// we are falling into the block, stop if we were falling
+	//		//	if (player.State == PlayerState::FallDown)
+	//		//	{
+	//		//		player.Velocity.x = 0;
+	//		//		player.Velocity.y = 0;
+	//		//		newPos.y = round(obstacle.y - player.Size.y);
+	//		//		player.State = PlayerState::Idle;
+	//		//	}
+	//		//	else
+	//		//	{
+	//		//		// we just know we can't go any further down
+	//		//		player.Velocity.y = 0;
+	//		//		newPos.y = round(obstacle.y - playerH);
+	//		//	}
+	//		//}
+	//	}
+	//	
+	//	/*if (player.State != PlayerState::FallDown && player.Velocity.y > 0)
+	//	{
+	//		player.State = PlayerState::FallDown;
+	//	}*/
+	//	
+	//	
+
+	//}
