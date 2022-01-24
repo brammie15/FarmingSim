@@ -17,7 +17,7 @@ int randomInt = 0;
 Texture2D tex;
 
 bool shouldDebug = false;
-
+Rectangle warriorRect;
 
 std::vector<Rectangle> Obstacles;
 float gravity = 500.0f;
@@ -145,7 +145,7 @@ void UpdateGameplayScreen(void)
 	}
 	//Add gravity
 	player.Velocity.y += gravity * GetFrameTime();
-
+	Vector2 oldPos = player.Position;
 	//calculate the position the player WILL be at
 	Vector2 newPos = Vector2Add(player.Position, Vector2Scale(player.Velocity, GetFrameTime()));
 
@@ -160,83 +160,98 @@ void UpdateGameplayScreen(void)
 	playerColor = ORANGE;
 	for (const Rectangle& obstacle : Obstacles)
 	{
-		if (CheckCollisionRecs(Rectangle{ newPos.x, newPos.y, player.Size.x, player.Size.y }, obstacle))
+		warriorRect = { newPos.x + player.Size.x/ 2, newPos.y - player.Size.y, player.Size.x, player.Size.y };
+		if (CheckCollisionRecs(warriorRect, obstacle))
 		{
-			float playerX = newPos.x;
-			float playerY = newPos.y;
-			float playerH = player.Size.y;
-			float playerW = player.Size.x;
-			Vector2 playerTL = { playerX, playerY };
-			Vector2 playerTR = { playerX + playerW, playerY };
-			Vector2 playerBL = { playerX, playerY + playerH };
-			Vector2 playerBR = { playerX + playerW, playerY + playerH };
-			if (shouldDebug) {
-				shouldDebug = true;
-			}
+			float playerLeft = newPos.x;
+			float playerRight = newPos.x + player.Size.x;
+			float playerTop = newPos.y;
 
-			randomInt = newPos.x + player.Size.x > obstacle.x;
+			float obstacleLeft = obstacle.x;
+			float obstacleRight = obstacle.x + obstacle.width;
+			float obstacleBottom = obstacle.y + obstacle.height;
 
-
-			/*if (player.Position.x < newPos.x && !(newPos.y >= obstacle.y + obstacle.height) && !(newPos.y + playerH <= obstacle.y) && !(newPos.x + playerW < obstacle.x)) {
-				player.Velocity.x = 0;
-				newPos.x = obstacle.x - playerW;
-			}*/
-			//Should handle Left Side Wall Collisions
-			if (player.Position.x < newPos.x && newPos.x + playerW > obstacle.x && !(newPos.y + playerH <= obstacle.y) && newPos.y < obstacle.y + obstacle.height ) {
-				printf("Left Side wall hit\n");
-				player.Velocity.x = 0;
-				newPos.x = obstacle.x - playerW;
-			}
-			
-
-			//Handle top surface collisions (works)
-			if (player.Position.y < newPos.y && newPos.y + playerH > obstacle.y && newPos.x + playerW > obstacle.x && newPos.x < obstacle.x + obstacle.width) // 
+			switch (player.State)
 			{
-				printf("Top wall hit\n");
-				// we are falling into the block, stop if we were falling
-				if (player.State == PlayerState::FallDown)
+			case PlayerState::FallDown:
+				// only two things can happen here
+				// 1) We landed on something
+				if (playerRight >= obstacleLeft && playerLeft <= obstacleRight && oldPos.y <= obstacle.y && newPos.y >= obstacle.y)
+				{
+					player.Velocity.y = 0;
+					newPos.y = obstacle.y;
+					player.State = PlayerState::Idle;
+				} // 2) we slapped the side of something
+				else if (player.Velocity.x < 0 && playerRight >= obstacleLeft)
+				{
+					player.Velocity.x = 0;
+					newPos.x = oldPos.x;
+					//newPos.x = oldPos.x;
+				}
+				else if (player.Velocity.x > 0 && playerLeft <= obstacleRight)
+				{
+					player.Velocity.x = 0;
+					newPos.x = oldPos.x;
+				}
+				break;
+
+			case PlayerState::Idle:
+				if (playerRight >= obstacleLeft && playerLeft <= obstacleRight && oldPos.y <= obstacle.y && newPos.y >= obstacle.y)
+				{
+					player.Velocity.y = 0;
+					player.Velocity.x = 0;
+					newPos.y = obstacle.y;
+					player.State = PlayerState::Idle;
+				}
+				break;
+
+			case PlayerState::Run:
+				if (playerRight >= obstacleLeft && playerLeft <= obstacleRight && oldPos.y <= obstacle.y && newPos.y >= obstacle.y)
+				{
+					player.Velocity.y = 0;
+					newPos.y = obstacle.y;
+				}
+				else if (player.Velocity.x > 0 && playerRight >= obstacleLeft)
+				{
+					player.Velocity.x = 0;
+					newPos.x = oldPos.x;
+				}
+				else if (player.Velocity.x < 0 && playerLeft <= obstacleRight)
+				{
+					player.Velocity.x = 0;
+					newPos.x = oldPos.x;
+				}
+				break;
+
+			case PlayerState::JumpStart:
+			case PlayerState::JumpUp:
+
+				if (playerRight >= obstacleLeft && playerLeft <= obstacleRight && oldPos.y + player.Size.y>= obstacleBottom && playerTop <= obstacleBottom)
+				{
+					player.Velocity.y = 0;
+					newPos.y = oldPos.y;
+					player.State = PlayerState::FallDown;
+				}
+				else if (playerRight >= obstacleLeft)
 				{
 					player.Velocity.x = 0;
 					player.Velocity.y = 0;
-					newPos.y = obstacle.y - playerH;
-					player.State = PlayerState::Idle;
+					newPos.x = oldPos.x;
+					player.State = PlayerState::FallDown;
 				}
-				else
+				else if (playerLeft <= obstacleRight)
 				{
-					// we just know we can't go any further down
+					player.Velocity.x = 0;
 					player.Velocity.y = 0;
-					newPos.y = obstacle.y - playerH;
+					newPos.x = oldPos.x;
+					player.State = PlayerState::FallDown;
 				}
+				break;
 			}
-			
-
-			////Handle Bottom surface collisions (works)
-			if (player.Position.y > newPos.y && newPos.x + playerW > obstacle.x) {
-				printf("Bottom wall hit\n");
-				if (player.State == PlayerState::JumpUp) {
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y + obstacle.height;
-					player.State = PlayerState::Idle;
-
-				}
-				else {
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y + obstacle.height;
-				}
-			}
-
-
-
-
-
-
 		}
+
+		
 	}
-
-
-
-
-
 
 	if (player.State != PlayerState::FallDown && round(player.Velocity.y) > 0)
 	{
@@ -272,6 +287,8 @@ void DrawGameplayScreen(void)
 	//DrawTriangle(Vector2{ player.Position.x , player.Position.y }, Vector2{ player.Position.x + (player.Size.x) / 4 , player.Position.y - 20 }, Vector2{ player.Position.x + player.Size.x / 2 , player.Position.y }, ORANGE);
 	//DrawTriangle(Vector2{ player.Position.x + player.Size.x / 2 , player.Position.y }, Vector2{ player.Position.x + (player.Size.x) / 4 + player.Size.x / 2, player.Position.y - 20 }, Vector2{ player.Position.x + player.Size.x / 2 + player.Size.x / 2, player.Position.y }, ORANGE);
 	DrawCircle(player.Position.x, player.Position.y,10,ORANGE);
+	DrawCircleV(Vector2{ player.Position.x,player.Position.y }, 3, YELLOW);
+	DrawRectangleLinesEx(warriorRect, 2, RED);
 	DrawCircle(0, 0, 10, PINK);
 }
 
