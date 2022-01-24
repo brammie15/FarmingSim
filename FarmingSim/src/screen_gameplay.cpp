@@ -25,7 +25,24 @@ float gravity = 500.0f;
 
 Player player;
 Color playerColor = ORANGE;
+float closestToZero(float value1, float value2, float value3, float value4)
+{
+	float nearest = value1;
+	if (abs(value2) < abs(nearest))
+	{
+		nearest = value2;
+	}
+	if (abs(value3) < abs(nearest))
+	{
+		nearest = value3;
+	}
+	if (abs(value4) < abs(nearest))
+	{
+		nearest = value4;
+	}
 
+	return nearest;
+}
 void getState() { //function to get the player state as a string
 	switch (player.State)
 	{
@@ -162,73 +179,39 @@ void UpdateGameplayScreen(void)
 	{
 		if (CheckCollisionRecs(Rectangle{ newPos.x, newPos.y, player.Size.x, player.Size.y }, obstacle))
 		{
-			float playerX = newPos.x;
-			float playerY = newPos.y;
-			float playerH = player.Size.y;
-			float playerW = player.Size.x;
-			Vector2 playerTL = { playerX, playerY };
-			Vector2 playerTR = { playerX + playerW, playerY };
-			Vector2 playerBL = { playerX, playerY + playerH };
-			Vector2 playerBR = { playerX + playerW, playerY + playerH };
-			if (shouldDebug) {
-				shouldDebug = true;
-			}
-
-			randomInt = newPos.x + player.Size.x > obstacle.x;
-
-
-			/*if (player.Position.x < newPos.x && !(newPos.y >= obstacle.y + obstacle.height) && !(newPos.y + playerH <= obstacle.y) && !(newPos.x + playerW < obstacle.x)) {
-				player.Velocity.x = 0;
-				newPos.x = obstacle.x - playerW;
-			}*/
-			//Should handle Left Side Wall Collisions
-			if (player.Position.x < newPos.x && newPos.x + playerW > obstacle.x && !(newPos.y + playerH <= obstacle.y) && newPos.y < obstacle.y + obstacle.height ) {
-				printf("Left Side wall hit\n");
-				player.Velocity.x = 0;
-				newPos.x = obstacle.x - playerW;
-			}
-			
-
-			//Handle top surface collisions (works)
-			if (player.Position.y < newPos.y && newPos.y + playerH > obstacle.y && newPos.x + playerW > obstacle.x && newPos.x < obstacle.x + obstacle.width) // 
+			float deltaL = newPos.x + player.Size.x - obstacle.x;
+			float deltaR = newPos.x - (obstacle.x + obstacle.width);
+			float deltaU = newPos.y + player.Size.y - obstacle.y;
+			float deltaD = newPos.y - (obstacle.y + obstacle.height);
+			float closest = closestToZero(deltaL, deltaR, deltaU, deltaD);
+			if (closest == deltaL)
 			{
-				printf("Top wall hit\n");
-				// we are falling into the block, stop if we were falling
-				if (player.State == PlayerState::FallDown)
-				{
-					player.Velocity.x = 0;
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y - playerH;
+				newPos.x -= deltaL;
+				
+				player.Velocity.x = 0;
+			}
+			else if (closest == deltaU)
+			{
+				newPos.y -= deltaU;
+				player.Velocity.y = 0;
+
+				if (player.State == PlayerState::FallDown) {
 					player.State = PlayerState::Idle;
 				}
-				else
-				{
-					// we just know we can't go any further down
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y - playerH;
-				}
+				
 			}
-			
+			else if (closest == deltaR)
+			{
+				newPos.x -= deltaR;
+				player.Velocity.x = 0;
 
-			////Handle Bottom surface collisions (works)
-			if (player.Position.y > newPos.y && newPos.x + playerW > obstacle.x) {
-				printf("Bottom wall hit\n");
-				if (player.State == PlayerState::JumpUp) {
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y + obstacle.height;
-					player.State = PlayerState::Idle;
-
-				}
-				else {
-					player.Velocity.y = 0;
-					newPos.y = obstacle.y + obstacle.height;
-				}
 			}
+			else if (closest == deltaD)
+			{
+				newPos.y -= deltaD;
+				player.Velocity.y = 0;
 
-
-
-
-
+			}
 
 		}
 	}
